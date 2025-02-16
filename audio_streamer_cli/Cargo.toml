@@ -1,0 +1,12 @@
+[package]
+name = "audio_streamer_cli"
+version = "0.1.0"
+edition = "2021"
+description = "CLI interface for the desktop audio streamer"
+
+[dependencies]
+audio_streamer = { path = "../audio_streamer" }
+clap = { version = "4.4", features = ["derive"] }  # CLI argument parsing
+env_logger = "0.10"
+log = "0.4"
+tokio = { version = "1.35", features = ["full"] }  # Async runtime

@@ -1,0 +1,44 @@
+[package]
+name = "audio_streamer"
+version = "0.1.0"
+edition = "2021"
+description = "A low-latency desktop audio capture and streaming library"
+
+[dependencies]
+# Audio capture and playback
+cpal = "0.15"  # Audio I/O
+ringbuf = "0.3"  # Lock-free ring buffer for audio samples
+byteorder = "1.5"  # Byte order handling for network packets
+
+# Error handling and logging
+thiserror = "1.0"
+log = "0.4"
+env_logger = "0.10"
+
+# Networking
+tokio = { version = "1.35", features = ["full"] }  # Async runtime
+socket2 = { version = "0.5", features = ["all"] }  # Low-level socket options
+libc = "0.2"  # System calls for socket options
+
+# Optional audio encoding
+opus = { version = "0.3", optional = true }  # Opus codec
+
+# macOS screen capture (for system audio)
+[target.'cfg(target_os = "macos")'.dependencies]
+screencapturekit = "0.3.4"  # macOS screen/audio capture
+core-foundation = "0.10"  # Required for screencapturekit
+core-media-rs = { version = "0.3" }  # Required for audio buffer handling
+core-video-rs = { version = "0.3" }
+core-utils-rs = { version = "0.3" }
+objc = { version = "0.2", features = ["exception"] }
+block2 = "0.6"
+dispatch = "0.2"
+core-graphics = { version = "0.24" }
+
+# Windows-specific dependencies
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.52", features = ["Win32_Media_Audio", "Win32_System_Com"] }
+
+[features]
+default = []
+compression = ["opus"]  # Optional audio compression

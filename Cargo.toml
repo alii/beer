@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "audio_streamer",
+    "audio_streamer_cli"
+]
+resolver = "2" 

@@ -1,0 +1,63 @@
+name: Build
+
+on:
+  push:
+    branches: ['master']
+  pull_request:
+    branches: ['master']
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+        include:
+          - os: windows-latest
+            artifact_name: audio_streamer_cli.exe
+            asset_name: audio_streamer_cli_windows.exe
+          - os: macos-latest
+            artifact_name: audio_streamer_cli
+            asset_name: audio_streamer_cli_macos
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build
+        run: cargo build --verbose --release
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: target/release/${{ matrix.artifact_name }}
+          if-no-files-found: error
+          compression-level: 6 # Balance between size and speed
+          retention-days: 90 # Keep artifacts for 90 days
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ github.sha }}
+          tag_name: release-${{ github.sha }}
+          files: |
+            audio_streamer_cli_windows.exe/audio_streamer_cli.exe
+            audio_streamer_cli_macos/audio_streamer_cli
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
